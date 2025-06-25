@@ -6,6 +6,7 @@ export default function ProfilePostCard({ content, postId }) {
     const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
     useEffect(() => {
+        console.log(postId)
         fetch(`https://bf5cd2b3-e25e-405b-88ca-5f3ad24fded2-00-38g012z3zpyd5.sisko.replit.dev/likes/post/${postId}`)
             .then((response) => response.json())
             .then((data) => setLikes(data.length))
