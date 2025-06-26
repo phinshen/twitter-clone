@@ -1,28 +1,24 @@
 import { jwtDecode } from 'jwt-decode';
-import { useEffect, useState } from 'react';
-import { Button, Col, Image, Nav, Row } from 'react-bootstrap';
+import { useEffect } from 'react';
+import { Button, Col, Image, Nav, Row, Spinner } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
 import ProfilePostCard from './ProfilePostCard';
+import { fetchPostsByUser } from '../features/posts/postsSlice';
 
 export default function ProfileMidBody() {
-    const [posts, setPosts] = useState([]);
     const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500";
     const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
-    const fetchPosts = (userId) => {
-        fetch(
-            `https://a64e1be2-fb15-4da5-aa3a-ca7b3cd7bf6f-00-2n7rcqv1gjpfc.pike.replit.dev/posts/user/${userId}`
-        )
-            .then((response) => response.json())
-            .then((data) => setPosts(data))
-            .catch((error) => console.error("Error:", error));
-    };
+    const dispatch = useDispatch();
+    const posts = useSelector(store => store.posts.posts);
+    const loading = useSelector(store => store.posts.loading);
 
     useEffect(() => {
         const token = localStorage.getItem("authToken"); // grabbing token from localStorage
         if (token) { // verifying the token
             const decodedToken = jwtDecode(token); // decoding token that grabbed from localStorage
             const userId = decodedToken.id;
-            fetchPosts(userId);
+            dispatch(fetchPostsByUser(userId));
         }
     }, []);
 
@@ -81,6 +77,9 @@ export default function ProfileMidBody() {
                     <Nav.Link eventKey="link-4">Likes</Nav.Link>
                 </Nav.Item>
             </Nav>
+            {loading && (
+                <Spinner animation="border" className="ms-3 mt-3" variant="primary" />
+            )}
             {posts.length > 0 ? posts.map((post) => (
                 <ProfilePostCard key={post.id} content={post.content} postId={post.id} />
             )) : <p>No posts yet</p>}
