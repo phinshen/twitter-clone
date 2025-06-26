@@ -1,9 +1,10 @@
-import { Container, Row } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useLocalStorage from 'use-local-storage';
 import ProfileSideBar from '../components/ProfileSideBar';
 import ProfileMidBody from '../components/ProfileMidBody';
+import SearchBar from '../components/SearchBar';
 
 export default function ProfilePage() {
     const [authToken, setAuthToken] = useLocalStorage("authToken", "");

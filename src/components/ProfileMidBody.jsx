@@ -1,16 +1,19 @@
 import { jwtDecode } from 'jwt-decode';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Col, Image, Nav, Row, Spinner } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import ProfilePostCard from './ProfilePostCard';
 import { fetchPostsByUser } from '../features/posts/postsSlice';
+import SearchBar from './SearchBar';
 
 export default function ProfileMidBody() {
     const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500";
     const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
+    const [query, setQuery] = useState("");
     const dispatch = useDispatch();
     const posts = useSelector(store => store.posts.posts);
+    console.log("All posts:", posts);
     const loading = useSelector(store => store.posts.loading);
 
     useEffect(() => {
@@ -21,6 +24,10 @@ export default function ProfileMidBody() {
             dispatch(fetchPostsByUser(userId));
         }
     }, []);
+
+    const filteredPosts = posts.filter(post =>
+        post.content?.toLowerCase().includes(query.toLowerCase())
+    )
 
     return (
         <Col sm={6} className="be-light" style={{ border: "1px solid lightgrey" }}>
@@ -77,12 +84,15 @@ export default function ProfileMidBody() {
                     <Nav.Link eventKey="link-4">Likes</Nav.Link>
                 </Nav.Item>
             </Nav>
+            <SearchBar query={query} setQuery={setQuery} />
             {loading && (
                 <Spinner animation="border" className="ms-3 mt-3" variant="primary" />
             )}
-            {posts.length > 0 ? posts.map((post) => (
-                <ProfilePostCard key={post.id} content={post.content} postId={post.id} />
-            )) : <p>No posts yet</p>}
+            {(query ? filteredPosts : posts).length > 0 ? (
+                (query ? filteredPosts : posts).map((post) => (
+                    <ProfilePostCard key={post.id} content={post.content} postId={post.id} />
+                ))
+            ) : <p>No posts yet</p>}
         </Col>
     )
 }
