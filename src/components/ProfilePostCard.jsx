@@ -1,33 +1,69 @@
-import { useEffect, useState } from 'react';
-import { Button, Col, Image, Row } from 'react-bootstrap';
+import { useEffect, useState } from "react";
+import { Button, Col, Image, Row } from "react-bootstrap";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 export default function ProfilePostCard({ content, postId }) {
-    const [likes, setLikes] = useState(0);
-    const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
+    const [likes, setLikes] = useState([]);
+
+    // Decoding to get the userId
+    const token = localStorage.getItem("authToken");
+    const decode = jwtDecode(token);
+    const userId = decode.id;
+
+    const pic =
+        "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
+    const BASE_URL =
+        "https://twitter-api-sigmaschooltech.sigma-school-full-stack.repl.co";
 
     useEffect(() => {
-        console.log(postId)
-        fetch(`https://bf5cd2b3-e25e-405b-88ca-5f3ad24fded2-00-38g012z3zpyd5.sisko.replit.dev/likes/post/${postId}`)
+        fetch(`${BASE_URL}/likes/post/${postId}`)
             .then((response) => response.json())
-            .then((data) => setLikes(data.length))
+            .then((data) => setLikes(data))
             .catch((error) => console.error("Error:", error));
     }, [postId]);
+
+    const isLiked = likes.some((like) => like.user_id === userId);
+
+    const handleLike = () => (isLiked ? removeFromLikes() : addToLikes());
+
+    const addToLikes = () => {
+        axios
+            .post(`${BASE_URL}/likes`, {
+                user_id: userId,
+                post_id: postId,
+            })
+            .then((response) => {
+                setLikes([...likes, { ...response.data, likes_id: response.data.id }]);
+            })
+            .catch((error) => console.error("Error:", error));
+    };
+
+    const removeFromLikes = () => {
+        const like = likes.find((like) => like.user_id === userId);
+        console.log(like);
+        if (like) {
+            axios
+                .put(`${BASE_URL}/likes/${like.likes_id}`)
+                .then(() => setLikes(likes.filter((like) => like.user_id !== userId)))
+                .catch((error) => console.error("Error:", error));
+        }
+    };
 
     return (
         <Row
             className="p-3"
             style={{
                 borderTop: "1px solid #D3D3D3",
-                borderBottom: "1px solid #D3D3D3"
+                borderBottom: "1px solid #D3D3D3",
             }}
         >
             <Col sm={1}>
                 <Image src={pic} fluid roundedCircle />
             </Col>
-
             <Col>
                 <strong>Haris</strong>
-                <span> @haris.samingan · Apr 16</span>
+                <span> @haris.samingnan · Apr 16</span>
                 <p>{content}</p>
                 <div className="d-flex justify-content-between">
                     <Button variant="light">
@@ -36,11 +72,16 @@ export default function ProfilePostCard({ content, postId }) {
                     <Button variant="light">
                         <i className="bi bi-repeat"></i>
                     </Button>
-                    <Button variant="light">
-                        <i className="bi bi-heart"> {likes}</i>
+                    <Button variant="light" onClick={handleLike}>
+                        {isLiked ? (
+                            <i className="bi bi-heart-fill text-danger"></i>
+                        ) : (
+                            <i className="bi bi-heart"></i>
+                        )}
+                        {likes.length}
                     </Button>
                     <Button variant="light">
-                        <i className="bi bi-graph-up"></i>
+                        <i className="bi bi-graph-up"></i> 61
                     </Button>
                     <Button variant="light">
                         <i className="bi bi-upload"></i>
@@ -48,5 +89,5 @@ export default function ProfilePostCard({ content, postId }) {
                 </div>
             </Col>
         </Row>
-    )
+    );
 }
