@@ -74,7 +74,7 @@ export default function ProfilePostCard({ post }) {
             {likes.length}
           </Button>
           <Button variant="light">
-            <i className="bi bi-graph-up"></i> 61
+            <i className="bi bi-graph-up"></i>
           </Button>
           <Button variant="light">
             <i className="bi bi-upload"></i>
